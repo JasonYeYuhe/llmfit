@@ -13,7 +13,10 @@
   <a href="https://github.com/AlexsJones/llmfit/actions/workflows/ci.yml"><img src="https://github.com/AlexsJones/llmfit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://crates.io/crates/llmfit"><img src="https://img.shields.io/crates/v/llmfit.svg" alt="Crates.io"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="许可证"></a>
+  <a href="https://about.signpath.io"><img src="https://img.shields.io/badge/SignPath-signed-brightgreen?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0id2hpdGUiIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZD0iTTEwLjA2NyA0LjU2N2wtNC43MzQgNC43MzMtMS40LTEuNGExIDEgMCAwIDAtMS40MTQgMS40MTRsMi4xIDIuMWExIDEgMCAwIDAgMS40MTQgMGw1LjQ0LTUuNDRhMSAxIDAgMCAwLTEuNDE0LTEuNDE0eiIvPjwvc3ZnPg==" alt="Signed with SignPath"></a>
 </p>
+
+> **新功能：[社区排行榜 (Community Leaderboard)](#社区排行榜-b)** — 浏览来自真实用户的真实性能数据。按 `b` 查看针对任何 GPU 实际测量的 tok/s、TTFT 和 VRAM，而不仅限于你当前拥有的硬件。使用 `H` 从 27 种以上硬件预设（从 RTX 5090 到 Apple M1）中进行选择，在购买或组装之前对比真实数据。
 
 **数百种模型与提供商，一条命令即可找出你的硬件能运行哪些模型。**
 
@@ -21,7 +24,9 @@
 
 内置交互式 TUI（默认）和经典 CLI 模式。支持多 GPU 配置、MoE（混合专家）架构、动态量化选择、速度估算，以及本地运行时提供商（Ollama、llama.cpp、MLX、Docker Model Runner、LM Studio）。
 
-**新功能：[硬件模拟](#硬件模拟-s)** — 在 TUI 中按 `S` 模拟不同硬件。覆盖 RAM、VRAM 和 CPU 核心数，无需离开应用即可查看哪些模型适合目标硬件。
+**新功能：[社区排行榜 (Community Leaderboard)](#社区排行榜-b) (`b`)** — 查看与你使用相同硬件的其他用户的真实 tok/s、TTFT 和 VRAM 占用数据。由 [localmaxxing.com](https://localmaxxing.com) 提供支持，这弥合了理论预估与实际性能之间的差距。
+
+此外，还有：[下载管理器 (Download Manager)](#下载管理器-d) (`D`)、[高级配置 (Advanced Configuration)](#高级配置-a) (`A`) 和 [硬件模拟 (Hardware Simulation)](#硬件模拟-s) — 按 `D` 管理下载、查看历史记录、删除模型和配置下载目录。按 `A` 调整 TPS 效率、运行模式因子和评分权重。按 `S` 模拟不同硬件。
 
 > **姐妹项目：**
 > - [sympozium](https://github.com/sympozium-ai/sympozium/) — 在 Kubernetes 中管理 Agent。
@@ -113,12 +118,16 @@ llmfit
 | `L`                        | 打开许可证过滤弹窗                              |
 | `R`                        | 打开运行时/后端过滤弹窗（llama.cpp、MLX、vLLM）  |
 | `S`                        | 打开硬件模拟弹窗（覆盖 RAM/VRAM/CPU）            |
+| `A`                        | 打开高级配置弹窗（调整效率、运行模式因子）       |
+| `b`                        | 打开社区排行榜视图 (localmaxxing.com)            |
+| `I`                        | 打开推理基准测试视图 (在本地运行的模型上进行质量评分) |
 | `h`                        | 打开帮助弹窗（所有快捷键）                      |
 | `m`                        | 标记选中模型用于对比                            |
 | `c`                        | 打开对比视图（已标记 vs 选中）                    |
 | `x`                        | 清除对比标记                                    |
 | `i`                        | 切换已安装优先排序（任何已检测的运行时提供商）    |
 | `d`                        | 下载选中模型（多个提供商可用时弹出选择器）        |
+| `D`                        | 打开下载管理器 (管理历史记录、删除、配置)          |
 | `r`                        | 从运行时提供商刷新已安装模型                    |
 | `Enter`                    | 切换选中模型的详情视图                          |
 | `PgUp` / `PgDn`            | 滚动 10 行                                      |
@@ -194,11 +203,159 @@ Plan 模式显示以下估算：
 |------------------------|-----------------------------------------|
 | `Tab` / `j` / `k`      | 在 RAM、VRAM、CPU 字段间切换            |
 | 输入数字               | 编辑选中字段                            |
-| `Enter`               | 应用模拟                                |
+| `Enter`                | 应用模拟                                |
 | `Ctrl-R`              | 重置为真实检测到的硬件                  |
 | `Esc`                 | 取消并关闭                              |
 
 模拟激活时，系统栏和状态栏会显示 `SIM` 标识。整个模型表格会反映模拟硬件，直到你重置。
+
+### 高级配置 (`A`)
+
+按 `A` 打开高级配置弹窗。该面板允许你调整 TPS 估算、运行模式惩罚和综合评分背后的参数——这解决了 [issue #449](https://github.com/AlexsJones/llmfit/issues/449) 中某些模型（例如 Qwen3 30B）的 tok/s 被高估的问题。
+
+所有更改会立即生效并重新计算模型表格。按 `Esc` 接受更改并关闭，或按 `Ctrl-R` 重置为默认值。
+
+| 字段 | 说明 | 默认值 |
+|---|---|---|
+| **Efficiency** | 基于带宽的 TPS 的全局效率因子。考虑了开销 | `0.55` |
+| **GPU factor** | 纯 GPU 推理的速度乘数 | `1.0` |
+| **CPU Offload** | 当权重溢出到系统 RAM 时的速度乘数 | `0.5` |
+| **MoE Offload** | 混合专家 (Mixture-of-Experts) 专家切换的速度乘数 | `0.8` |
+| **Tensor Par** | 张量并行推理的速度乘数 | `0.9` |
+| **CPU Only** | 纯 CPU 执行的速度乘数 | `0.3` |
+| **Context cap** | 用于内存估算的最大上下文长度（留空则使用默认值） | `auto` |
+
+| 按键 | 操作 |
+|---|---|
+| `Tab` / `j` / `k` | 在字段间切换 |
+| 输入数字 / `.` | 编辑选中字段 |
+| `Left` / `Right` | 在当前字段内移动光标 |
+| `Backspace` / `Delete` | 删除字符 |
+| `Ctrl-U` | 清空当前字段 |
+| `Enter` | 应用更改并重新计算所有评分 |
+| `Esc` / `q` | 取消并关闭 |
+
+### 下载管理器 (`D`)
+
+按 `D` 打开下载管理器视图。该全屏视图取代了主模型表格，并提供三个部分：
+
+- **正在下载 (Active Download)** — 显示当前正在进行的下载，包含进度条、模型名称和状态信息。
+- **配置 (Config)** — 显示（并允许编辑）GGUF 模型目录。配置的路径会在会话之间持久保存。
+- **历史记录 (History)** — 可导航的过去下载列表（最新的在最前），包含模型名称、提供商、状态和日期。可以从历史记录中移除失败的下载，可以从提供商中删除成功的下载。
+
+使用 `Tab` / `Shift-Tab` 在部分之间循环切换焦点。
+
+| 按键 | 操作 |
+|---|---|
+| `Tab` / `Shift-Tab` | 循环切换焦点：正在下载 → 配置 → 历史记录 |
+| `j` / `k` 或方向键 | 导航历史记录列表（当焦点在历史记录时） |
+| `x` | 删除选中模型（提示确认） |
+| `y` / `n` | 确认或取消删除 |
+| `e` | 编辑下载目录（当焦点在配置时） |
+| `Enter` | 确认目录编辑 |
+| `Esc` / `D` / `q` | 关闭并返回模型表格 |
+
+对于失败的下载（例如 404 错误），`x` 从历史记录中移除该条目。对于成功的下载，它会从提供商中删除模型（Ollama 和 llama.cpp 支持）。
+
+### 社区排行榜 (`b`)
+
+按 `b` 打开社区排行榜视图。此视图不仅仅依赖于 llmfit 的理论速度估算，而是显示来自使用相同硬件的其他用户的**真实性能数据** — 实际测量的 tok/s、首字延迟 (TTFT) 和峰值 VRAM 占用。
+
+![社区排行榜](assets/benchmark.jpeg)
+
+数据来源于 [localmaxxing.com](https://localmaxxing.com)，一个社区基准测试数据库。当你打开此视图时，llmfit 会自动检测你的硬件（GPU 型号、VRAM 等级、Apple Silicon 芯片系列、操作系统），并查询匹配的结果。
+
+| 列 | 说明 |
+|---|---|
+| **Model** | HuggingFace 模型 ID |
+| **Engine** | 使用的推理运行时（llama.cpp、vLLM、Ollama、MLX...） |
+| **Quant** | 量化格式（Q4_K_M、Q8_0 等） |
+| **tok/s** | 测量的输出 token 生成速度 |
+| **Total t/s**| 总吞吐量（提示词 + 生成） |
+| **TTFT** | 首字延迟 (Time to first token) |
+| **VRAM** | 推理期间的峰值内存占用 |
+| **Ctx** | 基准测试中使用的上下文长度 |
+| **User** | 提交者（带有 `*` 标记的是已验证用户） |
+
+| 按键 | 操作 |
+|---|---|
+| `j` / `k` 或方向键 | 导航结果 |
+| `H` | 打开硬件选择器（浏览任何 GPU） |
+| `r` | 刷新 / 重新从 API 获取 |
+| `b` / `q` / `Esc` | 关闭并返回模型表格 |
+
+按 `H` 打开硬件选择器 — 这是一个包含 27 种流行 GPU 和芯片（从 RTX 5090 到纯 CPU，加上 Apple Silicon M1-M4 变体、AMD RX/MI 系列和 NVIDIA 数据中心加速卡）的可滚动列表。选择一个即可立即加载该硬件的基准测试，即使它不是你正在运行的硬件。选择 "My Hardware (auto-detect)" 返回到你自己的系统。
+
+#### API 密钥设置
+
+公共基准测试无需身份验证即可工作。为了获得完全访问权限，请提供你的 [localmaxxing.com](https://localmaxxing.com) API 密钥：
+
+```sh
+# 通过环境变量（推荐）
+export LOCALMAXXING_API_KEY="bhk_your_key_here"
+llmfit
+
+# 或通过 CLI 标志
+llmfit --api-key "bhk_your_key_here"
+```
+
+| 变量 | 说明 |
+|---|---|
+| `LOCALMAXXING_API_KEY` | localmaxxing.com API 的 Bearer token |
+
+### 推理基准测试 (`I`)
+
+按 `I`（大写）打开推理基准测试视图。这会**针对你本地运行的提供商运行实时推理基准测试** — Ollama、vLLM 和 MLX — 使用真实的推理请求测量首字延迟 (TTFT)、每秒 tokens 数 (TPS) 和总延迟。
+
+不同于社区排行榜（它显示来自其他用户的众包数据），推理基准测试测量的是你实际硬件和你实际模型的表现。
+
+#### TUI 用法
+
+| 按键 | 操作 |
+|---|---|
+| `I` | 打开推理基准测试（自动检测提供商并运行基准测试） |
+| `I` (再次) | 在基准测试视图中重新运行基准测试 |
+| `j` / `k` 或方向键 | 导航模型结果 |
+| `Enter` | 打开选中模型的详细视图 |
+| `r` | 切换到路由矩阵视图 |
+| `q` / `Esc` | 关闭基准测试视图 |
+
+结果缓存至 `~/.config/llmfit/bench-cache.json` 中，并在后续打开时立即加载。
+
+#### CLI 用法
+
+```sh
+# 自动检测提供商并进行基准测试
+llmfit bench
+
+# 对所有运行中的提供商中所有发现的模型进行基准测试
+llmfit bench --all
+
+# 通过 Ollama 对特定模型进行基准测试
+llmfit bench --provider ollama llama3.2
+
+# 覆盖端点 URL
+llmfit bench --provider ollama --url http://my-server:11434 llama3.2
+
+# 覆盖 vLLM 端点
+llmfit bench --provider vllm --url http://localhost:8000
+
+# 输出为 JSON（用于脚本）
+llmfit bench --json
+
+# 运行质量基准测试（基于角色的评分用于路由）
+llmfit bench --quality
+
+# 输出路由矩阵
+llmfit bench --quality --routing
+```
+
+#### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama API 基础 URL |
+| `VLLM_PORT` | `8000` | vLLM 服务器端口（用作 `http://localhost:$VLLM_PORT`） |
 
 ### 主题
 
@@ -420,7 +577,7 @@ llmfit plan "Qwen/Qwen2.5-Coder-0.5B-Instruct" --context 8192 --json
 
    公式：`(bandwidth_GB_s / model_size_GB) × efficiency_factor`
 
-   效率因子（0.55）考虑了内核开销、KV 缓存读取和内存控制器效应。该方法已通过 llama.cpp 的公开基准测试验证（[Apple Silicon](https://github.com/ggml-org/llama.cpp/discussions/4167)、[NVIDIA T4](https://github.com/ggml-org/llama.cpp/discussions/4225)）及实际测量数据。
+   效率因子（0.55）和各模式的速度乘数均可通过高级配置弹窗（在 TUI 中按 `A`）进行调整。默认值考虑了内核开销、KV 缓存读取和内存控制器效应。该方法已通过 llama.cpp 的公开基准测试验证（[Apple Silicon](https://github.com/ggml-org/llama.cpp/discussions/4167)、[NVIDIA T4](https://github.com/ggml-org/llama.cpp/discussions/4225)）及实际测量数据。
 
    带宽查找表涵盖约 80 种 GPU，覆盖 NVIDIA（消费级 + 数据中心级）、AMD（RDNA + CDNA）和 Apple Silicon 系列。
 
